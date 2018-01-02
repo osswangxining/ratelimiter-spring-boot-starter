@@ -1,7 +1,7 @@
-# ratelimiter-spring-boot-starter
-Spring Boot Starter for Guava Rate Limter
+# Rate Limiter Spring Boot Starter
+This is one Spring Boot Starter for Guava Rate Limter.
 
-## How to use this starter.
+## It's easy to use this starter
 
 ### 1.add dependencies into pom.xml
 ```
@@ -77,3 +77,14 @@ public class HelloController {
     
 }
 ```
+
+## The underlying technologies
+
+### Spring Boot：定制拦截器
+除了使用过滤器包装web请求，Spring MVC还提供HandlerInterceptor（拦截器）工具。根据文档，HandlerInterceptor的功能跟过滤器类似，但拦截器提供更精细的控制能力：在request被响应之前、request被响应之后、视图渲染之前以及request全部结束之后。我们不能通过拦截器修改request内容，但是可以通过抛出异常（或者返回false）来暂停request的执行。
+
+Spring MVC中常用的拦截器有：LocaleChangeInterceptor（用于国际化配置）和ThemeChangeInterceptor,也可以增加自己定义的拦截器.
+
+Spring Boot提供了基础类WebMvcConfigurerAdapter, 项目中的WebConfiguration类继承WebMvcConfigurerAdapter；覆盖并重写了addInterceptors(InterceptorRegistory registory)方法，这是典型的回调函数——利用该函数的参数registry来添加自定义的拦截器。
+
+在Spring Boot的自动配置阶段，Spring Boot会扫描所有WebMvcConfigurer的实例，并顺序调用其中的回调函数，这表示：如果我们想对配置信息做逻辑上的隔离，可以在Spring Boot项目中定义多个WebMvcConfigurer的实例。
