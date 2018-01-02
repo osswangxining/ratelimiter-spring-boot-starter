@@ -3,9 +3,9 @@ Spring Boot Starter for Guava Rate Limter
 
 ## How to use this starter.
 
-### add dependencies into pom.xml
+### 1.add dependencies into pom.xml
 ```
-<dependencies>
+      <dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -41,3 +41,39 @@ Spring Boot Starter for Guava Rate Limter
 	</dependencies>
   ```
   
+### 2. addInterceptors for specified path patterns 
+
+```
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import osswangxining.github.io.ratelimiter.LimiterAnnotationBean;
+import osswangxining.github.io.ratelimiter.RateLimiterInterceptor;
+@Configuration
+public class WebAppConfig extends WebMvcConfigurerAdapter {
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(new RateLimiterInterceptor()).addPathPatterns("/");
+	}
+	
+	@Bean
+	public LimiterAnnotationBean limiterAnnotationBean() {
+		return new LimiterAnnotationBean("hello");
+	}
+}
+```
+
+### 3. Add Limiter annotation into Rest Controller
+```
+@RestController
+public class HelloController {
+    
+    @RequestMapping("/")
+    @Limiter(0.1)
+    public String index() {
+        return "Greetings from Spring Boot!";
+    }
+    
+}
+```
