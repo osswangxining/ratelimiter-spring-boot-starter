@@ -159,3 +159,24 @@ public class MyTestBean2 implements BeanNameAware, InitializingBean {
  - 实现DisposableBean接口。
 如果指定了destory-method属性，也实现了DisposableBean接口，Spring容器会先执行DisposableBean的destroy()方法，然后执行destory-method属性指定的方法。
 
+### Spring 生命周期方法
+当一个 bean 被实例化时，它可能需要执行一些初始化使它转换成可用状态。同样，当 bean 不再需要，并且从容器中移除时，可能需要做一些清除工作。
+
+Bean的完整生命周期经历了各种方法调用，这些方法可以划分为以下几类：
+ - Bean自身的方法：这个包括了Bean本身被@PostConstruct和@PreDestroy注解的方法和通过配置文件中<bean>的init-method和destroy-method指定的方法
+ - Bean生命周期回调接口方法：这个包括了BeanNameAware、BeanFactoryAware、ApplicationContextAware、InitializingBean和DiposableBean这些接口的方法
+ - 容器级生命周期接口方法：这个包括了BeanPostProcessor 和BeanFactoryPostProcessor 这两个接口实现，一般称它们的实现类为“后处理器”。
+	
+#### 执行顺序
+假设一个bean使用了上边所有的方式，那么它们的执行顺序是这样的：
+
+1. 如果bean实现了 BeanNameAware接口，则调用BeanNameAware.setBeanName()
+2. 如果bean实现了BeanFactoryAware接口，则调用BeanFactoryAware.setBeanFactory()
+3. 如果bean实现了ApplicationContextAware接口，则调用ApplicationContextAware.setApplicationContext()
+4. @PostConstruct 注解指定的初始化方法
+5. 如果bean实现了InitializingBean接口，则调用InitializingBean.afterPropertiesSet()
+6. 调用<bean>的init-method属性指定的初始化方法
+7. @PreDestroy注解指定的销毁方法
+8. 如果bean实现了DiposibleBean接口，则调用DiposibleBean.destory()
+9. 调用<bean>的destroy-method属性指定的初始化方法
+
