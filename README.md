@@ -44,6 +44,9 @@ This is one Spring Boot Starter for Guava Rate Limter.
 ### 2. addInterceptors for specified path patterns 
 
 ```
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -58,6 +61,8 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
 	}
 	
 	@Bean
+	@ConditionalOnMissingBean
+        @ConditionalOnProperty(prefix = "rate.limiter",value = "enabled",havingValue = "true")
 	public LimiterAnnotationBean limiterAnnotationBean() {
 		return new LimiterAnnotationBean("hello");
 	}
