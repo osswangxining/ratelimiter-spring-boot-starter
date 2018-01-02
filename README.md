@@ -80,7 +80,7 @@ public class HelloController {
 
 ## The underlying technologies
 
-### Spring Boot：定制拦截器
+### 1. Spring Boot：定制拦截器
 除了使用过滤器包装web请求，Spring MVC还提供HandlerInterceptor（拦截器）工具。根据文档，HandlerInterceptor的功能跟过滤器类似，但拦截器提供更精细的控制能力：在request被响应之前、request被响应之后、视图渲染之前以及request全部结束之后。我们不能通过拦截器修改request内容，但是可以通过抛出异常（或者返回false）来暂停request的执行。
 
 Spring MVC中常用的拦截器有：LocaleChangeInterceptor（用于国际化配置）和ThemeChangeInterceptor,也可以增加自己定义的拦截器.
@@ -89,7 +89,7 @@ Spring Boot提供了基础类WebMvcConfigurerAdapter, 项目中的WebConfigurati
 
 在Spring Boot的自动配置阶段，Spring Boot会扫描所有WebMvcConfigurer的实例，并顺序调用其中的回调函数，这表示：如果我们想对配置信息做逻辑上的隔离，可以在Spring Boot项目中定义多个WebMvcConfigurer的实例。
 
-### Spring的装配bean
+### 2. Spring的装配bean
 Spring容器负责创建应用中的bean，并通过DI维护这些bean之间的协作关系。作为开发人员，应该负责告诉Spring容器需要创建哪些bean以及如何将各个bean装配到一起。Spring提供三种装配bean的方式：
  - 基于XML文件的显式装配
  - 基于Java文件的显式装配
@@ -98,3 +98,64 @@ Spring容器负责创建应用中的bean，并通过DI维护这些bean之间的�
 例如，@Component注解告诉Spring需要创建XX bean。XML配置中使用<context:component-scan>标签启动Component扫描功能，并可设置base-package属性。类似的，Java中@ComponentScan(basePackages = "。。。。")。
 
 此外， 通过@Autowired注解可以完成自动装配。
+
+### 3. Spring Bean注入、销毁时执行指定行为
+Spring提供了2种方式在Bean全部属性设置成功后执行的特定行为: 
+1. 使用init-method属性。 
+2. 实现InitializingBean接口。 
+如果某个Bean类实现了InitializingBean接口，同时指定了init-method属性，Spring容器会先调用接口的afterPropertiesSet()方法，然后调用init-method指定的方法。 
+#### 在配置文件中使用init-method属性。
+```
+public class MyTestBean implements BeanNameAware {
+    private String id;
+
+    public void init() {
+        System.out.println("正在执行初始化方法 init...");
+    }
+
+    @Override
+    public void setBeanName(String name) {
+        this.id = name;
+    }
+
+    public void info() {
+        System.out.println(id);
+    }
+}
+```
+指定Bean全部属性设置完成后执行该对象的init方法:
+```
+<bean id="myTestBean" class="xxx.MyTestBean" init-method="init"/>
+```
+
+#### 实现InitializingBean
+
+```
+public class MyTestBean2 implements BeanNameAware, InitializingBean {
+    private String id;
+
+    public void init() {
+        System.out.println("正在执行初始化方法 init...");
+    }
+
+    @Override
+    public void setBeanName(String name) {
+        this.id = name;
+    }
+
+    public void info() {
+        System.out.println(id);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        System.out.println("实现 InitializingBean 接口");
+    }
+}
+```
+
+同样销毁Bean执行特定方法也有2种:
+ - 使用destory-method属性。
+ - 实现DisposableBean接口。
+如果指定了destory-method属性，也实现了DisposableBean接口，Spring容器会先执行DisposableBean的destroy()方法，然后执行destory-method属性指定的方法。
+
